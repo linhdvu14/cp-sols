@@ -1,0 +1,64 @@
+''' A - Permutation Grid
+https://atcoder.jp/contests/arc132/tasks/arc132_a
+'''
+
+import io, os, sys
+input = io.BytesIO(os.read(0,os.fstat(0).st_size)).readline  # decode().strip() if str
+output = sys.stdout.write
+
+DEBUG = os.environ.get('debug') is not None
+
+if DEBUG:
+    from inspect import currentframe, getframeinfo
+    from re import search
+
+def debug(*args):
+    if not DEBUG: return
+    frame = currentframe().f_back
+    s = getframeinfo(frame).code_context[0]
+    r = search(r"\((.*)\)", s).group(1)
+    vnames = r.split(', ')
+    var_and_vals = [f'{var}={val}' for var, val in zip(vnames, args)]
+    prefix = f'{currentframe().f_back.f_lineno:02d}: '
+    print(f'{prefix}{", ".join(var_and_vals)}')
+
+
+from types import GeneratorType
+def bootstrap(f, stack=[]):
+    def wrappedfunc(*args, **kwargs):
+        if stack: return f(*args, **kwargs)
+        to = f(*args, **kwargs)
+        while True:
+            if type(to) is GeneratorType:
+                stack.append(to)
+                to = next(to)
+            else:
+                stack.pop()
+                if not stack: break
+                to = stack[-1].send(to)
+        return to
+    return wrappedfunc
+
+
+INF = float('inf')
+
+# -----------------------------------------
+
+# permute rectangle with black lower right half
+def solve(N, R, C, Q, queries):
+    return ''.join('#' if R[r-1] + C[c-1] > N else '.' for r, c in queries)
+
+
+def main():
+    N = int(input())
+    R = list(map(int, input().split()))
+    C = list(map(int, input().split()))
+    Q = int(input())
+    queries = [list(map(int, input().split())) for _ in range(Q)]
+    out = solve(N, R, C, Q, queries)
+    output(f'{out}\n')
+
+
+if __name__ == '__main__':
+    main()
+
